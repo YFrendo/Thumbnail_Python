@@ -1,9 +1,10 @@
 import json
 import os
-from flask import Flask
-from flask import jsonify
+import uuid
+from flask import Flask,flash,request,redirect,url_for
+from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = {'pdf','png','jpg'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -17,6 +18,16 @@ def bienvenue():
 
 @app.route('/images',methods=['GET','POST'])
 def upload():
-    if request
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return 'No file part'
+        upload_file = request.files['file']
+
+        if upload_file.filename == '':
+            return 'No selected file'
+        #filename = str(uuid.uuid4())
+        upload_file.save(os.path.join(app.config['UPLOAD_FOLDER'], upload_file.filename))
+        return upload_file.filename 
+
 
 
