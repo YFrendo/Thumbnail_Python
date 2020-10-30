@@ -3,6 +3,8 @@ import os
 import uuid
 from flask import Flask,flash,request,redirect,url_for
 from werkzeug.utils import secure_filename
+from PIL import Image
+
 
 UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = {'pdf','png','jpg'}
@@ -25,9 +27,15 @@ def upload():
 
         if upload_file.filename == '':
             return 'No selected file'
-        #filename = str(uuid.uuid4())
-        upload_file.save(os.path.join(app.config['UPLOAD_FOLDER'], upload_file.filename))
-        return upload_file.filename 
+        
+        try:
+           im = Image.open(upload_file)
+        except:
+            return "Cannot open file"
+
+        filename = str(len(os.listdir('./uploads'))) #Donne un numéroID unique
+        upload_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return filename 
 
 
 
