@@ -1,10 +1,10 @@
 import json
 import os
-import uuid
+import pickle
 from flask import Flask,flash,request,redirect,url_for
 from werkzeug.utils import secure_filename
-from PIL import Image
-
+from PIL import Image, ExifTags
+from task_celery import extract_metadata
 
 UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = {'pdf','png','jpg'}
@@ -33,9 +33,22 @@ def upload():
         except:
             return "Cannot open file"
 
-        filename = str(len(os.listdir('./uploads'))) #Donne un numéroID unique
-        upload_file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return filename 
+        id_dossier = str(len(os.listdir('./uploads'))) #Donne un numéroID unique
+        os.makedirs('./uploads/' + id_dossier)#Fait un dossier avec le numéro d'id
+        im.save(os.path.join(app.config['UPLOAD_FOLDER'] + '/' + id_dossier, upload_file.filename)) 
+
+        exif = {
+                ExifTags.TAGS[k] : v
+                for k, v in im.getexif().items()
+                if k in ExifTags.TAGS
+                }
+        exif = str(exif)
+        print(type(exif))
+        print(exif)
+        with open('./uploads/' + id_dossier + '/' + upload_file.filename + '_metadata.json','w') as outfile:
+            outfile.write(exif)
+        #Enregistre le fichier dans le dossier
+        return id_dossier 
 
 
 
